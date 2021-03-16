@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>8 Zip</title>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+      /*
+        bg: #1b1e2a;
+        primary: #2a52fb;
+        dark button: #202020;
+      */
+      body{
+        background-color: #1b1e2a;
+        font-family: -apple-system, BlinkMacSystemFont,
+          "Segoe UI","Roboto","Oxygen","Ubuntu","Cantarell",
+          "Fira Sans","Droid Sans","Helvetica Neue",
+          sans-serif;
+      }
+
+      #app-container{
+        width: 90%;
+        max-width: 800px;
+        margin: auto;
+        position: relative;
+      }
+
+      .page{
+        width: 100%;
+        height: 80vh;
+        margin-top: 10vh;
+        color: #FFF;
+        text-align: center;
+      }
+
+      #logo{
+        height: 100%;
+        position: relative;
+      }
+
+      #logo-path{
+        transition: stroke-dasharray ease-in-out 2s;
+        stroke-dasharray: 750;
+        stroke-dashoffset: 0;
+        /*stroke-dasharray: 100;
+        animation: logo-loading 3s linear infinite alternate;*/
+      }
+
+      @keyframes logo-loading {
+        from{
+          stroke-dashoffset: 0;
+        }
+        to {
+          stroke-dashoffset: 175;
+        }
+      }
+
+      @keyframes logo-rainbow{
+        0%{ stroke: #2a52fb; }
+        25%{ stroke: #fa2ab8; }
+        50%{ stroke: #fad42a; }
+        75%{ stroke: #2afa6c; }
+        100%{ stroke: #2a52fb; }
+      }
+
+      #button-open{
+        
+      }
+
+      #button-create{
+
+      }
+
+      #browser-content{
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background-color: #32374e;
+      }
+
+      #page-browser{
+        position:absolute;
+        left: 0;
+        z-index: 20;
+        display: none;
+        top: -10vh;
+        clip-path: circle(0px at center);
+        transition: clip-path 2s;
+      }
+
+      #browser-content.editor #browser-path{
+        flex: 1 1 75%;
+      }
+
+      #editor-tools{
+        display: none;
+      }
+
+      #browser-content.editor #editor-tools{
+        display: block;
+        flex: 1 1 25%;
+      }
+
+      #browser-path{
+        padding: 0 1rem;
+        text-align: left;
+        display: flex;
+        list-style: none;
+        overflow: hidden;
+      }
+
+      #browser-path > li{
+        background-color: rgba(0,0,0,0.3);
+        padding: 10px 10px 10px 25px;
+        position: relative;
+        margin-right: 15px;
+      }
+
+      #browser-path > li::after{
+        content: ' ';
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 50%;
+        margin-top: -20px;
+        left: 100%;
+        z-index: 2;
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+        border-left: 15px solid rgba(0,0,0,0.3);
+      }
+
+      #browser-path > li:not(:first-child):before{
+        content: ' ';
+        width: 0;
+        height: 0;
+        position: absolute;
+        top: 50%;
+        margin-top: -20px;
+        left: 0;
+        z-index: 2;
+        border-top: 20px solid transparent;
+        border-bottom: 20px solid transparent;
+        border-left: 15px solid #32374e;
+      }
+
+      #browser-path > li.active {
+        background-color: #4561de;
+      }
+
+      #browser-path > li.active::after{
+        border-left: 15px solid #4561de;
+      }
+
+      #browser-area{
+        flex: 1 1 0;
+        margin-bottom: 4px;
+        overflow-y: scroll;
+      }
+
+      @media(min-width: 768px){
+        #browser-area::-webkit-scrollbar {
+          width: 8px;
+        }
+
+        /* Track */
+        #browser-area::-webkit-scrollbar-track {
+          background: rgba(0,0,0,0.3);
+        }
+
+        /* Handle */
+        #browser-area::-webkit-scrollbar-thumb {
+          background: #4561de;
+        }
+
+        /* Handle on hover */
+        #browser-area::-webkit-scrollbar-thumb:hover {
+          background: #2f4399;
+        }
+      }
+
+      #browser-area > ul {
+        list-style: none;
+        padding-inline-end: 20px;
+      }
+
+      #browser-area > ul > li {
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+        display: flex;
+        flex-direction: row;
+        padding: 12px;
+      }
+
+      #browser-area > ul > li > img {
+        height: 2rem;
+        margin-right: 8px;
+      }
+
+      #browser-area > ul > li > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        text-align: left;
+        flex: 1 1 0;
+      }
+
+      #browser-area > ul > li > small {
+        display: flex;
+        flex-direction: column;
+        justify-content: flex-end;
+      }
+
+      .outline-button{
+        background-color: rgba(0,0,0,0.3);
+        background-repeat:no-repeat;
+        border: 1px solid #4561de;
+        padding: 4px 8px;
+        border-radius: 4px;
+        transition: background-color 0.15s;
+        color: #FFF;
+      }
+
+      .outline-button:hover{
+        background-color: #4561de;
+      }
+
+      @media(max-width:768px){
+        .page{
+          height: 90vh;
+          margin-top: 5vh;
+        }
+
+        #page-browser, #loading-overlay{
+          top: -5vh;
+        }
+
+        #browser-topbar{
+          flex-direction: column;
+        }
+      }
+
+      #loading-overlay{
+        position: absolute;
+        display: none;
+        left: 0;
+        top: -10vh;
+        flex-direction: column;
+        justify-content: center;
+        clip-path: circle(0% at center);
+        transition: clip-path 1s;
+        z-index: 90;
+      }
+
+      #loading-overlay.active{
+        display: flex;
+      }
+
+      #loading-path{
+        stroke-dasharray: 100;
+        stroke-dashoffset: 0;
+      }
+
+      #loading-path.active{
+        animation: loading-animation 1s linear 0s infinite forwards;
+      }
+
+      @keyframes loading-animation{
+        from {stroke-dashoffset: 0;}
+        to {stroke-dashoffset: 200;}
+      }
+
+      #export-overlay{
+        position: absolute;
+        display: none;
+        left: 0;
+        top: -10vh;
+        clip-path: circle(0% at center);
+        transition: clip-path 1s;
+        z-index: 80;
+      }
+
+      #export-overlay.active{
+        display: block;
+      }
+
+      #export-inner{
+        width: 80%;
+        height: 50%;
+        margin: 25% auto;
+        background-color: rgba(0,0,0,0.5);
+      }
+
+      #export-inner > div{
+        display: flex;
+        flex-direction: row;
+        padding: 8px;
+      }
+
+      #export-inner > div > div {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 12px;
+      }
+
+      #export-inner > .crypt-options{
+        display: none;
+      }
+
+      #export-inner.password-protected > .crypt-options{
+        display: flex;
+      }
+
+      .slider{
+        position: relative;
+        display: inline-block;
+        width: 2rem;
+        height: 2rem;
+        margin-left: 8px;
+      }
+
+      .slider input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+      }
+
+      .slider span {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #202020;
+        -webkit-transition: .2s;
+        transition: .2s;
+        border-radius: 50%;
+        border: 2px #FFF solid;
+      }
+
+      .slider input:checked + span {
+        background-color: #4561de;
+      }
+
+      .slider input:focus + span {
+        box-shadow: 0 0 1px #4561de;
+      }
+
+      .slider span > svg > path {
+        transition: stroke-dashoffset ease-in-out 0.4s;
+        stroke-dashoffset: 100;
+        stroke-dasharray: 100;
+      }
+
+      .slider input:checked + span > svg > path {
+        stroke-dashoffset: 0;
+      }
+
+      select{
+        background-color: transparent;
+        color: #FFF;
+        padding: 6px 12px;
+        border-radius: 4px;
+        border: 1px solid #FFF;
+      }
+
+      select > option {
+        background-color: #202020;
+      }
+
+      input[type="text"]{
+        background-color: transparent;
+        color: #FFF;
+        border-radius: 4px;
+        padding: 6px 12px;
+        border: 1px solid #FFF;
+      }
+
+    </style>
+  </head>
+  <body>
+    <div id="app-container">
+      <div id="page-main" class="page">
+        <div id="logo">
+          <svg id="logo-svg" viewbox="0 0 100 250" style="height:100%;">
+            <path id="logo-path" fill="none" stroke="#2a52fb" stroke-width="8" d="M4,50 a46,46 0 1,1 50,50 a46,46 0 1,0 42,50 a46,46 0 0,0 -50,-50 a46,46 0 0,1 -42,-50"/>
+            <g id="button-open">
+              <circle cx="50" cy="54" r="42" fill="#202020" />
+              <image href="https://cdn.glitch.com/adccd4d0-5ac4-481f-8d5a-4ad95680fa5d%2Fupload.png?v=1582990805315" x="25" y="29" height="50" width="50"/>
+            </g>
+            <g id="button-create">
+              <circle cx="50" cy="146" r="42" fill="#202020" />
+              <image href="https://cdn.glitch.com/adccd4d0-5ac4-481f-8d5a-4ad95680fa5d%2Fadd.png?v=1582990805667" x="25" y="121" height="50" width="50"/>
+            </g>
+            <text x="50" y="225" fill="#FFF" style="font-family: Arial;" text-anchor="middle" textlength="80">ZIP</text>
+          </svg>
+        </div>
+      </div>
+      <div id="page-browser" class="page">
+        <div id="browser-content">
+          <div id="browser-topbar" style="display: flex;">
+            <ul id="browser-path">
+                <li>/</li>
+                <li>a</li>
+                <li>b</li>
+              </ul>
+              <div id="editor-tools">
+                <div style="display: flex; flex-direction: column; justify-content: center; height: 100%;">
+                  <div>
+                    <button id="btn-add-file" class="outline-button">
+                      <img src="assets/upload.svg"/>
+                    </button>
+                    <button id="btn-new-folder" class="outline-button" style="margin-left: 4px;">
+                      <img src="assets/newfolder.svg"/>
+                    </button>
+                    <button id="btn-export" class="outline-button" style="margin-left: 4px;">
+                        <img src="assets/download.svg"/>
+                      </button>
+                  </div>
+                </div>
+              </div>
+          </div>
+          
+          <div id="browser-area">
+            <ul id="browser-list">
+              <li>
+                <img src="assets/file.svg" />
+                <div>File Name</div>
+                <small>621 bytes</small>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div id="loading-overlay" class="page">
+        <svg id="loading-svg" viewbox="0 0 100 100" style="height:30%;">
+          <defs>
+              <linearGradient id="loading-gradient">
+                  <stop offset="0%" stop-color="#fa2ab8" />
+                  <stop offset="100%" stop-color="#2afa6c" />
+              </linearGradient>
+            </defs>
+          <circle cx="50" cy="50" r="50" fill="rgba(0,0,0,0.7)" />
+          <path id="loading-path" fill="none" stroke="url(#loading-gradient)" stroke-width="4" d="M22,50 a13,13 0 1,1 26,0 a13,13 0 0,0 26,0 a13,13 0 0,0 -26,0 a13,13 0 1,1 -26,0"/>
+        </svg>
+      </div>
+
+      <div id="export-overlay" class="page">
+        <div id="export-inner">
+          <div>
+            <div>Password Protected:</div>
+            <div>
+              <label class="slider">
+                <input id="cb-has-password" type="checkbox"/>
+                <span>
+                  <svg viewbox="0 0 30 30">
+                    <path stroke="#FFF" fill="none" stroke-width="4" d="M4,16 l10,8 l10,-16"></path>
+                  </svg>
+                </span>
+              </label>
+            </div>
+          </div>
+          <div class="crypt-options">
+            <div>Encryption Mode:</div>
+            <div>
+              <select id="dl-encrypt-mode">
+                <option>AES256</option>
+                <option>ZipCrypto</option>
+              </select>
+            </div>
+          </div>
+          <div class="crypt-options">
+            <div>Password:</div>
+            <div>
+              <input id="tb-encrypt-password" type="text" />
+            </div>
+          </div>
+          <button id="btn-export-confirm" style="padding: 8px 12px;" class="outline-button">Export</button>
+          <button id="btn-export-cancel" style="padding: 8px 12px;" class="outline-button">Cancel</button>
+        </div>
+      </div>
+    </div>
+    <input id="inp-archive-upload" type="file" style="display:none;" />
+    <input id="inp-add-file" type="file" style="display: none;" />
+    <a id="lnk-download-export" style="display: none;"></a>
+
+    <script src="polyfill.min.js"></script>
+    <script src="aes.js"></script>
+    <script src="pako.min.js"></script>
+    <script src="script.js"></script>
+    <script src="zip-utils.js"></script>
+    <script src="bittools.js"></script>
+  </body>
+</html>
